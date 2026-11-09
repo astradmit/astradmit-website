@@ -1,0 +1,15 @@
+# Firebase and tooling
+.firebase/
+firebase-debug.log*
+*.log
+node_modules/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Never commit passwords, keys or private files
+*.pem
+*.key
+service-account*.json
+.env
