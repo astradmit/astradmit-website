@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "your-firebase-project-id"
-  }
+    "default": "astradmit-website",
+    "Prod": "astradmit-website"
+  },
+  "targets": {},
+  "etags": {}
 }
