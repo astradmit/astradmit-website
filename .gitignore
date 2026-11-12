@@ -13,3 +13,7 @@ Thumbs.db
 *.key
 service-account*.json
 .env
+
+# Pages created automatically when the site is published (do not commit these)
+site/resources/
+site/feed.xml
