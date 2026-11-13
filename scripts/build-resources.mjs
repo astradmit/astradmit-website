@@ -43,6 +43,8 @@ if (!ORIGIN) { console.error('Could not read the website address from site/resou
 const ORG_ID = `${ORIGIN}/#organization`, PERSON_ID = `${ORIGIN}/about.html#priyanka-khandelwal`;
 const DEFAULT_IMG = `${ORIGIN}/assets/img/og-image.png`;
 const FOUNDER_NAME = 'Priyanka Khandelwal';
+const BOOK = (HEADER.match(/class="btn btn-gold" href="([^"]+)"/) || [])[1] || '/contact.html';
+const BOOK_ATTR = /^https?:/.test(BOOK) ? ' target="_blank" rel="noopener"' : '';
 
 function shell({ title, desc, canonical, ogType = 'website', ogImage = DEFAULT_IMG, robots = 'index, follow, max-image-preview:large', schema = [], body, extraMeta = '' }) {
   const ld = schema.map((o) => `<script type="application/ld+json">${JSON.stringify(o, null, 1)}</script>`).join('\n');
@@ -242,7 +244,7 @@ if (posts.length) {
   const re = /<!--POSTS:START-->[\s\S]*?<!--POSTS:END-->/;
   fs.writeFileSync(resourcesPath, resourcesSrc.replace(re, () => `<!--POSTS:START-->\n${listing(1)}\n<!--POSTS:END-->`));
 }
-const CTA = `<section class="cta-band"><div class="container reveal"><h2>Want help turning this into a plan?</h2><p>Book a free 1:1 consultation and we will look at your profile, your goals and your timeline together.</p><a class="btn btn-gold" href="/contact.html">Book a 1:1 Consultation</a></div></section>`;
+const CTA = `<section class="cta-band"><div class="container reveal"><h2>Want help turning this into a plan?</h2><p>Book a free 1:1 consultation and we will look at your profile, your goals and your timeline together.</p><a class="btn btn-gold" href="${BOOK}"${BOOK_ATTR}>Book a 1:1 Consultation</a></div></section>`;
 const hero = (crumbs, h1, lead) => `<section class="page-hero"><div class="container"><p class="crumbs">${crumbs}</p><h1>${h1}</h1>${lead}</div></section>`;
 for (let n = 2; n <= pageCount; n++) {
   const body = hero('<a href="/index.html">Home</a> / <a href="/resources.html">Resources</a> / Page ' + n, `Articles and videos, page ${n}`, '<p class="lead">Practical, honest guidance for MBA and Master\'s applicants.</p>')
