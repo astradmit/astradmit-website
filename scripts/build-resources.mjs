@@ -269,7 +269,7 @@ ${isVideo ? videoFrame(p.yid, p.title, p.image) : (p.image ? `<img src="${esc(no
 ${bodyHtml}
 </div>
 ${p.tags.length ? `<p class="meta" style="margin-top:2em">Topics: ${p.tags.map(esc).join(', ')}</p>` : ''}
-<p class="quick" style="margin-top:2em">Written by <a href="/about.html#founder">${esc(p.author)}</a>, founder of Astradmit, who has spent 12 years helping MBA and Master's applicants. Astradmit offers mentoring and process guidance and does not guarantee admissions or scholarships.</p>
+<p class="quick" style="margin-top:2em">Written by <a href="/about.html#founder">${esc(p.author)}</a>, founder of Astradmit, who has spent over a decade helping MBA and Master's applicants. Astradmit offers mentoring and process guidance and does not guarantee admissions or scholarships.</p>
 ${nav}
 </article></div></section>` + CTA;
   const author = { '@type': 'Person', '@id': PERSON_ID, name: p.author, url: `${ORIGIN}/about.html` };

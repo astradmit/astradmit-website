@@ -184,3 +184,8 @@ legend+*{clear:both}
 }
 @media (max-width:1020px){.founder{grid-template-columns:1fr}.founder-photo{position:static;max-width:420px}.post-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:640px){.post-grid{grid-template-columns:1fr}.consent{left:10px;right:10px;bottom:10px}.consent-actions{width:100%}.consent-actions .btn{flex:1}.post-nav{grid-template-columns:1fr}.post-nav a:last-child{text-align:left}.checks{grid-template-columns:1fr}h1{font-size:2rem}.hero .deco{display:none}section{padding:64px 0}.g2,.g3,.g4,.row2,.foot-grid{grid-template-columns:1fr}.hero{padding:56px 0 64px}.quote-band{flex-direction:column;align-items:flex-start;padding:32px}.btn-row{gap:16px}.container{width:min(1160px,100% - 36px)}}
+/* strategy banner (home + about) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.strategy-banner{width:100%;height:auto;border-radius:var(--radius);box-shadow:var(--shadow)}
+.strategy-text{max-width:52em;margin:34px auto 0}.strategy-text p{font-size:1.08rem;color:var(--slate)}
+.strategy-cta{margin:26px 0 0;text-align:center}
