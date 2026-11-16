@@ -189,3 +189,7 @@ legend+*{clear:both}
 .strategy-banner{width:100%;height:auto;border-radius:var(--radius);box-shadow:var(--shadow)}
 .strategy-text{max-width:52em;margin:34px auto 0}.strategy-text p{font-size:1.08rem;color:var(--slate)}
 .strategy-cta{margin:26px 0 0;text-align:center}
+/* responsive strategy banner (home): wide artwork on tablet/desktop, portrait artwork on phones */
+.strategy-picture{display:block;width:100%;max-width:100%}
+.strategy-picture .strategy-banner{display:block;width:100%;max-width:100%;height:auto}
+@media (max-width:640px){.strategy-picture{max-width:560px;margin-inline:auto}.strategy-picture .strategy-banner{border-radius:0;box-shadow:none}}
