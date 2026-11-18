@@ -263,7 +263,7 @@ posts.forEach((p, idx) => {
   const nav = (newer || older) ? `<nav class="post-nav" aria-label="More posts">${older ? `<a href="/resources/${older.slug}.html" rel="prev"><small>Older</small>${esc(older.title)}</a>` : '<span></span>'}${newer ? `<a href="/resources/${newer.slug}.html" rel="next"><small>Newer</small>${esc(newer.title)}</a>` : '<span></span>'}</nav>` : '';
   const body = hero(crumbs, esc(p.title), metaLine)
     + `<section><div class="container"><article class="post">
-${isVideo ? videoFrame(p.yid, p.title, p.image) : (p.image ? `<img src="${esc(normPath(p.image))}" alt="${esc(p.title)}" width="1200" height="630" style="border-radius:18px;margin-bottom:1.4em" decoding="async">` : '')}
+${isVideo ? videoFrame(p.yid, p.title, p.image) : (p.image ? `<img src="${esc(normPath(p.image))}" alt="${esc(p.title)}" width="1200" height="630" class="post-hero-img" decoding="async">` : '')}
 <p class="quick"><strong>In short:</strong> ${esc(p.summary)}</p>
 <div class="post-body">
 ${bodyHtml}
