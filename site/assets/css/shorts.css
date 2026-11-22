@@ -1,0 +1,36 @@
+/* "Short videos" carousel (Home and Resources). Loaded by the carousel section itself. */
+.shorts{display:none;padding:56px 0 8px}
+.js .shorts{display:block}
+.shorts[hidden]{display:none!important}
+.shorts-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:22px}
+.shorts-head h2{margin:0 0 6px}.shorts-head p{margin:0;color:var(--slate);max-width:46em}
+.shorts-nav{display:flex;gap:10px;flex:none}
+.shorts-nav button{width:48px;height:48px;border-radius:50%;border:2px solid var(--navy);background:#fff;color:var(--navy);display:grid;place-items:center;cursor:pointer;padding:0;transition:background .15s,color .15s,opacity .15s}
+.shorts-nav button:hover:not(:disabled){background:var(--navy);color:#fff}
+.shorts-nav button:disabled{opacity:.4;cursor:default}
+.shorts-nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.shorts.no-scroll .shorts-nav{visibility:hidden}.shorts.no-scroll .dots{display:none}
+.shorts.no-scroll .shorts-foot{justify-content:flex-start}
+.shorts-track{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 0 42px;margin:-4px 0 -20px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.shorts-track::-webkit-scrollbar{display:none}
+.short{position:relative;flex:0 0 calc((100% - 4*18px)/4.5);aspect-ratio:9/16;border-radius:var(--radius);overflow:hidden;scroll-snap-align:start;box-shadow:var(--shadow);display:block;text-decoration:none;background:linear-gradient(160deg,#3B82F6,#1E3A8A);transition:transform .2s}
+.short:hover{transform:translateY(-4px)}
+.short img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.short .cap{position:absolute;left:0;right:0;bottom:0;padding:56px 16px 16px;color:#fff;font-weight:700;font-size:1rem;line-height:1.3;background:linear-gradient(to top,rgba(15,23,42,.92),rgba(15,23,42,0));display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;box-sizing:border-box;height:auto}
+.short .badge{position:absolute;top:12px;left:12px;background:#fff;color:var(--navy);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.short .pl{position:absolute;top:50%;left:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:rgba(15,23,42,.55);display:grid;place-items:center;border:2px solid rgba(255,255,255,.85)}
+.short .pl svg{width:26px;height:26px;margin-left:3px}
+.short--sk{pointer-events:none;background:linear-gradient(110deg,#E8EEF7 30%,#F4F7FB 50%,#E8EEF7 70%);background-size:200% 100%;animation:shorts-sk 1.4s linear infinite;box-shadow:none}
+@keyframes shorts-sk{to{background-position:-200% 0}}
+.shorts-foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.dots{display:flex;gap:8px;min-height:10px}.dots i{width:10px;height:10px;border-radius:99px;background:#CBD5E1;transition:width .2s,background .2s}.dots i.on{width:28px;background:var(--navy)}
+.shorts-foot .btn{padding:12px 24px;font-size:.95rem}
+.short-modal{border:0;padding:0;background:transparent;max-width:none;max-height:none;overflow:visible;color:#fff}
+.short-modal[open]{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.short-modal::backdrop{background:rgba(15,23,42,.85)}
+.short-close{background:#fff;color:var(--navy);border:0;border-radius:999px;padding:10px 20px;font:600 .95rem var(--body);cursor:pointer}
+.short-frame{position:relative;height:min(82vh,780px);aspect-ratio:9/16;max-width:92vw;background:#000;border-radius:var(--radius);overflow:hidden}
+.short-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+@media (max-width:1000px){.short{flex-basis:calc((100% - 3*18px)/3.3)}}
+@media (max-width:640px){.shorts{padding-top:36px}.shorts-head{display:block}.shorts-nav{display:none}.short{flex-basis:62%}.shorts-foot{justify-content:center}.shorts-foot .dots{order:2;width:100%;justify-content:center}.shorts-foot .btn{order:1}.short-frame{height:min(78vh,780px)}}
+@media (prefers-reduced-motion:reduce){.short,.short-modal{transition:none}.short--sk{animation:none}}

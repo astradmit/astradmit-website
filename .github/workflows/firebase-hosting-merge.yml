@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '17 */6 * * *'   # every 6 hours: picks up new YouTube Shorts
+  workflow_dispatch:         # lets you press "Run workflow" on GitHub
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -14,6 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Fetch the latest YouTube Shorts for the carousel
+        run: node scripts/build-shorts.mjs
+        env:
+          SHORTS_STRICT: ${{ github.event_name == 'schedule' && '1' || '' }}
       - name: Build the Resources pages (articles and videos)
         run: node scripts/build-resources.mjs
       - uses: FirebaseExtended/action-hosting-deploy@v0
