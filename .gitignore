@@ -17,3 +17,7 @@ service-account*.json
 # Pages created automatically when the site is published (do not commit these)
 site/resources/
 site/feed.xml
+
+# Short videos carousel data and thumbnails, created when the site is published (do not commit these)
+site/assets/shorts.json
+site/assets/img/shorts/

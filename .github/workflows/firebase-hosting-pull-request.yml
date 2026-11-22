@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Fetch the latest YouTube Shorts for the carousel
+        run: node scripts/build-shorts.mjs
       - name: Build the Resources pages (articles and videos)
         run: node scripts/build-resources.mjs
       - uses: FirebaseExtended/action-hosting-deploy@v0
