@@ -1,0 +1,147 @@
+From 8f68378e368b9a9957674fb2ce352590db363eea Mon Sep 17 00:00:00 2001
+From: Astradmit <noreply@example.com>
+Date: Sat, 28 Nov 2026 10:33:37 +0000
+Subject: [PATCH] ci: refresh the site on schedule only when YouTube has a new
+ Short
+
+The scheduled run now checks the channel's Shorts feed against the
+shorts.json that is live on the site and skips the build and deploy
+when nothing is new. Pushes to main and manual runs always publish.
+---
+ .github/workflows/firebase-hosting-merge.yml | 16 ++++++-
+ README.md                                    |  6 +++
+ scripts/build-shorts.mjs                     | 44 ++++++++++++++++++--
+ 3 files changed, 61 insertions(+), 5 deletions(-)
+
+diff --git a/.github/workflows/firebase-hosting-merge.yml b/.github/workflows/firebase-hosting-merge.yml
+index 778b8d1..761b322 100644
+--- a/.github/workflows/firebase-hosting-merge.yml
++++ b/.github/workflows/firebase-hosting-merge.yml
+@@ -7,8 +7,8 @@ on:
+     branches:
+       - main
+   schedule:
+-    - cron: '17 */6 * * *'   # every 6 hours: picks up new YouTube Shorts
+-  workflow_dispatch:         # lets you press "Run workflow" on GitHub
++    - cron: '17 */6 * * *'   # every 6 hours: checks YouTube, and publishes only if there is a new Short
++  workflow_dispatch:         # lets you press "Run workflow" on GitHub (always publishes)
+ jobs:
+   build_and_deploy:
+     runs-on: ubuntu-latest
+@@ -17,13 +17,25 @@ jobs:
+       - uses: actions/setup-node@v4
+         with:
+           node-version: 20
++      # Scheduled runs only: compare YouTube with the Shorts list already live on the site.
++      # If there is nothing new, the three steps below are skipped and the live site is left untouched.
++      - name: Check YouTube for new Shorts
++        id: check
++        if: ${{ github.event_name == 'schedule' }}
++        run: node scripts/build-shorts.mjs
++        env:
++          SHORTS_STRICT: '1'
++          SHORTS_COMPARE_URL: https://www.astradmit.com/assets/shorts.json
+       - name: Fetch the latest YouTube Shorts for the carousel
++        if: ${{ github.event_name != 'schedule' || steps.check.outputs.changed == 'true' }}
+         run: node scripts/build-shorts.mjs
+         env:
+           SHORTS_STRICT: ${{ github.event_name == 'schedule' && '1' || '' }}
+       - name: Build the Resources pages (articles and videos)
++        if: ${{ github.event_name != 'schedule' || steps.check.outputs.changed == 'true' }}
+         run: node scripts/build-resources.mjs
+       - uses: FirebaseExtended/action-hosting-deploy@v0
++        if: ${{ github.event_name != 'schedule' || steps.check.outputs.changed == 'true' }}
+         with:
+           repoToken: ${{ secrets.GITHUB_TOKEN }}
+           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ASTRADMIT_WEBSITE }}
+diff --git a/README.md b/README.md
+index ec3745f..07c8daa 100644
+--- a/README.md
++++ b/README.md
+@@ -23,3 +23,9 @@ Never edit `main` directly. See the Astradmit Deploy and Update Guide for step-b
+ 3. Open a pull request, check the preview link, and merge.
+ 
+ Files starting with `_` are templates and are never published. Add `draft: true` to hide a post until it is ready.
++
++## Short videos carousel
++
++The YouTube Shorts carousel on Home and Resources is built from the channel's public feed. A scheduled run checks the channel every 6 hours and only rebuilds and publishes the site when there is a new Short that the live site does not show yet. If nothing is new, the run ends without changing anything.
++
++To refresh the carousel straight away, open **Actions**, choose **Deploy to Firebase Hosting on merge**, and press **Run workflow**. Manual runs and merges to `main` always publish.
+diff --git a/scripts/build-shorts.mjs b/scripts/build-shorts.mjs
+index 3a2d1cc..292cc51 100644
+--- a/scripts/build-shorts.mjs
++++ b/scripts/build-shorts.mjs
+@@ -10,13 +10,19 @@
+     site/assets/shorts.json          the list of videos, newest first
+     site/assets/img/shorts/<id>.jpg  one thumbnail per video
+ 
+-  Uses only Node.js built-in modules. Runs automatically in GitHub Actions before every deploy
+-  and every 6 hours, so new YouTube Shorts appear on the website without any manual step.
++  Uses only Node.js built-in modules. Runs automatically in GitHub Actions before every deploy.
++  A scheduled run (every 6 hours) first runs this script in CHECK mode (see SHORTS_COMPARE_URL), and the
++  site is only rebuilt and published when YouTube has a Short that the live carousel does not have yet.
+ 
+   Settings (environment variables, all optional):
+     SHORTS_STRICT=1        stop with an error if YouTube cannot be reached or the list is empty
+                            (used by the scheduled run so the live site keeps its current carousel)
+     SHORTS_FEED_FILE=path  read a saved copy of the feed instead of YouTube (for testing)
++    SHORTS_COMPARE_URL=u   CHECK mode: compare the YouTube feed with the shorts.json that is already live
++                           (a web address, or a file path for testing). Nothing is written or downloaded.
++                           Prints "changed=true" or "changed=false" (and writes it to GITHUB_OUTPUT when that
++                           exists). If the live list cannot be read, it reports changed=true so the site is
++                           refreshed rather than left stale.
+ */
+ import fs from 'node:fs';
+ import path from 'node:path';
+@@ -30,7 +36,8 @@ const ROOT = process.argv[2] ? path.resolve(process.argv[2]) : path.resolve(path
+ const SITE = path.join(ROOT, 'site');
+ const THUMB_DIR = path.join(SITE, 'assets', 'img', 'shorts');
+ const OUT = path.join(SITE, 'assets', 'shorts.json');
+-const STRICT = process.env.SHORTS_STRICT === '1';
++const COMPARE = process.env.SHORTS_COMPARE_URL;
++const STRICT = process.env.SHORTS_STRICT === '1' || !!COMPARE; // check mode never replaces the live carousel with an empty one
+ const FEED_FILE = process.env.SHORTS_FEED_FILE;
+ const UA = { 'User-Agent': 'AstradmitSiteBuild/1.0 (+https://www.astradmit.com)' };
+ const ID_RE = /^[A-Za-z0-9_-]{11}$/;
+@@ -102,6 +109,37 @@ if (!videos.length) problem('the YouTube Shorts feed has no videos');
+ 
+ videos.sort((a, b) => Date.parse(b.published) - Date.parse(a.published)); // newest first
+ const list = videos.slice(0, KEEP);
++
++// CHECK mode: is there a Short on YouTube that the live site does not show yet? Writes nothing, downloads nothing.
++async function liveIds() {
++  try {
++    let text;
++    if (/^https?:\/\//.test(COMPARE)) {
++      const r = await fetch(COMPARE + (COMPARE.includes('?') ? '&' : '?') + 't=' + Date.now(), { headers: { ...UA, 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(20000) });
++      if (!r.ok) throw new Error('HTTP ' + r.status);
++      text = await r.text();
++    } else text = fs.readFileSync(COMPARE, 'utf8');
++    const data = JSON.parse(text);
++    if (!Array.isArray(data.videos)) throw new Error('no video list in the file');
++    return new Set(data.videos.map((v) => v.id));
++  } catch (e) {
++    console.warn('WARNING: could not read the live carousel list (' + (e.message || e) + '). Treating this as "changed" so the site gets refreshed.');
++    return null;
++  }
++}
++if (COMPARE) {
++  const live = await liveIds();
++  const fresh = live ? list.filter((v) => !live.has(v.id)) : list;
++  const changed = fresh.length > 0;
++  const msg = changed
++    ? (live ? `${fresh.length} new Short(s) on YouTube: ${fresh.map((v) => v.id).join(', ')}. Rebuilding and publishing.` : 'Live list unavailable. Rebuilding and publishing.')
++    : `No new Shorts on YouTube (${list.length} checked, all already on the live site). Nothing to publish.`;
++  console.log(`Shorts check: changed=${changed}. ${msg}`);
++  if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`);
++  if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `**Shorts check:** ${msg}\n`);
++  process.exit(0);
++}
++
+ for (const v of list) v.thumb = await getThumb(v.id);
+ if (!FEED_FILE) for (const v of list) if (!v.thumb) console.warn(`WARNING: no thumbnail for ${v.id}; its card will show a plain colour`);
+ finish(list);
+-- 
+2.43.0
+
