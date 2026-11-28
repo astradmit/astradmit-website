@@ -23,3 +23,9 @@ Never edit `main` directly. See the Astradmit Deploy and Update Guide for step-b
 3. Open a pull request, check the preview link, and merge.
 
 Files starting with `_` are templates and are never published. Add `draft: true` to hide a post until it is ready.
+
+## Short videos carousel
+
+The YouTube Shorts carousel on Home and Resources is built from the channel's public feed. A scheduled run checks the channel every 6 hours and only rebuilds and publishes the site when there is a new Short that the live site does not show yet. If nothing is new, the run ends without changing anything.
+
+To refresh the carousel straight away, open **Actions**, choose **Deploy to Firebase Hosting on merge**, and press **Run workflow**. Manual runs and merges to `main` always publish.

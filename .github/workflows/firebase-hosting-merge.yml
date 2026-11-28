@@ -7,8 +7,8 @@ on:
     branches:
       - main
   schedule:
-    - cron: '17 */6 * * *'   # every 6 hours: picks up new YouTube Shorts
-  workflow_dispatch:         # lets you press "Run workflow" on GitHub
+    - cron: '17 */6 * * *'   # every 6 hours: checks YouTube, and publishes only if there is a new Short
+  workflow_dispatch:         # lets you press "Run workflow" on GitHub (always publishes)
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -17,13 +17,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      # Scheduled runs only: compare YouTube with the Shorts list already live on the site.
+      # If there is nothing new, the three steps below are skipped and the live site is left untouched.
+      - name: Check YouTube for new Shorts
+        id: check
+        if: ${{ github.event_name == 'schedule' }}
+        run: node scripts/build-shorts.mjs
+        env:
+          SHORTS_STRICT: '1'
+          SHORTS_COMPARE_URL: https://www.astradmit.com/assets/shorts.json
       - name: Fetch the latest YouTube Shorts for the carousel
+        if: ${{ github.event_name != 'schedule' || steps.check.outputs.changed == 'true' }}
         run: node scripts/build-shorts.mjs
         env:
           SHORTS_STRICT: ${{ github.event_name == 'schedule' && '1' || '' }}
       - name: Build the Resources pages (articles and videos)
+        if: ${{ github.event_name != 'schedule' || steps.check.outputs.changed == 'true' }}
         run: node scripts/build-resources.mjs
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: ${{ github.event_name != 'schedule' || steps.check.outputs.changed == 'true' }}
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ASTRADMIT_WEBSITE }}
